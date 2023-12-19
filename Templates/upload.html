@@ -1,16 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple File Upload to AWS S3</title>
-</head>
-<body>
-    <h1>파일 업로드</h1>
-    <form method = "POST" action="/upload/" method="post" enctype="multipart/form-data">
-        <label for="files">파일 선택:</label>
-        <input type="file" name="files" id="files" accept=".jpg, .jpeg, .png, .gif" multiple = """>
-        <button type="submit">업로드</button>
-    </form>
-</body>
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="ko">
+	<head>
+		<title>Multiple File Upload (Client-Side and Server-Side)</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/upload.css') }}" />
+		<noscript><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/noscript.css') }}" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="/" class="logo">Spoit</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="#">This is SPOit data analysis</a></li>
+							<!-- <li><a href="generic.html">Generic Page</a></li>
+							<li><a href="elements.html">Elements Reference</a></li> -->
+						</ul>
+						<ul class="icons">
+							<!-- <li><a href="http://spoit.io/main/index.php" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li> -->
+							<li><a href="http://spoit.io/main/index.php" class="icon brands fa-dribbble" target=”_blank”><span class="label">Website</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1><a href="#">파일 업로드</a></h1>
+								</header>
+								<form method="POST" action="/upload/" enctype="multipart/form-data">
+									<label for="file" class="file-upload-btn">파일 선택</label>
+									<input type="file" id="file" name="files" accept=".jpg, .jpeg, .png, .gif" multiple onchange="previewFiles()">
+									<div id="file-list"></div>
+									<div id="file-count">총 <span id="count">0</span>개의 파일이 업로드되었습니다.</div>
+									<button type="submit" class="file-upload-btn"">파일 업로드</button>
+								</form>							
+								
+							</section>
+
+					</div>
+
+					<script>
+						function previewFiles() {
+							const fileListDiv = document.getElementById('file-list');
+							const fileCountSpan = document.getElementById('count');
+							const fileInput = document.getElementById('file');
+							const files = fileInput.files;
+				
+							fileListDiv.innerHTML = '';
+				
+							if (files.length === 0) {
+								fileListDiv.innerHTML = '파일을 선택하세요.';
+							} else {
+								const ul = document.createElement('ul');
+				
+								for (let i = 0; i < files.length; i++) {
+									const li = document.createElement('li');
+									li.textContent = files[i].name;
+				
+									// 파일명이 길면 줄여서 표시
+									if (li.textContent.length > 25) {
+										li.textContent = li.textContent.substring(0, 25) + '...';
+									}
+				
+									ul.appendChild(li);
+								}
+				
+								fileListDiv.appendChild(ul);
+							}
+				
+							fileCountSpan.textContent = files.length;
+						}
+					</script>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul>&copy; SPOit</ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+		<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/jquery.scrollex.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/jquery.scrolly.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/browser.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/breakpoints.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/util.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+
+	</body>
 </html>
