@@ -6,7 +6,7 @@
 -->
 <html lang="ko">
 	<head>
-		<title>Multiple File Upload (Client-Side and Server-Side)</title>
+		<title>SPOit</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
@@ -47,7 +47,7 @@
 								<form method="POST" action="/upload/" enctype="multipart/form-data">
 									<label for="file" class="file-upload-btn">파일 선택</label>
 									<input type="file" id="file" name="files" accept=".jpg, .jpeg, .png, .gif" multiple onchange="previewFiles()">
-									<div id="file-list"></div>
+									<div style="overflow:auto; width:350px; height:200px; background-color: #FFF8CD;" id="file-list"></div>
 									<div id="file-count">총 <span id="count">0</span>개의 파일이 업로드되었습니다.</div>
 									<button type="submit" class="file-upload-btn"">파일 업로드</button>
 								</form>							
@@ -62,9 +62,10 @@
 							const fileCountSpan = document.getElementById('count');
 							const fileInput = document.getElementById('file');
 							const files = fileInput.files;
-				
+
 							fileListDiv.innerHTML = '';
-				
+							
+
 							if (files.length === 0) {
 								fileListDiv.innerHTML = '파일을 선택하세요.';
 							} else {

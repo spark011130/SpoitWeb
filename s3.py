@@ -35,6 +35,11 @@ def list_all_objects(s3, bucket_name):
         return False
     return True
 
+def test_del_obj(s3, bucket_name):
+    for elem in s3.list_objects_v2(Bucket = BUCKET_NAME)["Contents"]:
+            if elem['Key'].startswith("user/"):
+                print(elem['Key'])
+
 def upload_file(file_name, bucket, object_name = None):
     '''Upload a file to a S3 bucket
     
@@ -79,10 +84,11 @@ def download_file(file_name, bucket, object_name = None, download_path = None):
     return True
 
 # list_all_buckets(s3)
-list_all_objects(s3, BUCKET_NAME)
+# list_all_objects(s3, BUCKET_NAME)
 
 # query = input().rstrip()
 # if query == 'download':
 #     download_file('Pizza.jpeg', 'spoits3', 'Pizza2.jpeg')
 # if query == 'upload':
 #     upload_file('/Users/spoit/Desktop/SPOit Computer Vision Projects/SPOit/AWS/pizza.jpeg', 'spoits3', 'Pizza.jpeg')
+test_del_obj(s3, BUCKET_NAME)
