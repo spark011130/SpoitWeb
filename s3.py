@@ -83,6 +83,19 @@ def download_file(file_name, bucket, object_name = None, download_path = None):
         return False
     return True
 
+def urlGenerate(s3, bucket_name, object_key):
+    try:
+        presigned_url = s3.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket_name, 'Key': object_key},
+            ExpiresIn = 3600
+        )
+        print('Presigned URL:', presigned_url)
+    # except NoCredentialsError:
+    #     print('Credentials not available')
+    except Exception as e:
+        print(f'Error: {e}')
+
 # list_all_buckets(s3)
 # list_all_objects(s3, BUCKET_NAME)
 
@@ -91,4 +104,4 @@ def download_file(file_name, bucket, object_name = None, download_path = None):
 #     download_file('Pizza.jpeg', 'spoits3', 'Pizza2.jpeg')
 # if query == 'upload':
 #     upload_file('/Users/spoit/Desktop/SPOit Computer Vision Projects/SPOit/AWS/pizza.jpeg', 'spoits3', 'Pizza.jpeg')
-test_del_obj(s3, BUCKET_NAME)
+urlGenerate(s3, BUCKET_NAME, 'user/images.zip')
