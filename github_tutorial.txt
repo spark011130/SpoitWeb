@@ -1,0 +1,7 @@
+git config --global user.name "spark_1130"
+git config --global user.email "phkamth0@gmail.com"
+git branch v6
+git checkout v6
+
+
+git remote -v

@@ -1,0 +1,68 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    margin: 50px;
+}
+
+
+input[type="file"] {
+    display: none;
+}
+.file-upload-btn {
+    all: initial; 
+    font-family: "Source Sans Pro", Helvetica, sans-serif;
+    padding: 10px 20px;
+    background-color: whitesmoke;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s !important;
+    font-size: 16px;
+    margin-top: 20px;
+    border-style: solid;
+    border-color: rgb(193, 193, 193);
+    border-radius: 5px;
+
+}
+
+.file-upload-btn:hover {
+    all: initial;
+    font-family: "Source Sans Pro", Helvetica, sans-serif;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color : #18bfef;
+    color: whitesmoke !important;
+    border-style: solid;
+    border-color: #18bfef;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+#file-list {
+    max-width: 300px;
+    margin: 20px auto;
+    text-align: left;
+}
+
+#file-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#file-list li {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+#file-list .highlight {
+    font-weight: bold;
+    color: #3498db;
+}
+
+#file-count {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}

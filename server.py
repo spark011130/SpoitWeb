@@ -4,7 +4,6 @@ import boto3 # 서버 관련 모듈
 import zipfile # 압축 관련 모듈
 import os # 경로 관련 모듈
 import shutil # 디렉토리의 내용 삭제 관련 모듈
-
 import logging
 from botocore.exceptions import NoCredentialsError, ClientError
 
@@ -98,31 +97,17 @@ def upload():
         zip_img_name = img_dir_path + '/images.zip'
         zip_images(img_dir_path, zip_img_name)
         
-        s3.upload_file(zip_img_name, BUCKET_NAME, DIRECTORY_NAME + "images.zip")
+        s3.upload_file(img_dir_path+"/images.zip", BUCKET_NAME, DIRECTORY_NAME + "images.zip")
 
         url = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
         #업로드가 완료되었습니다 창과 함께 모든 사진들을 html에 갤러리 모드로 보여주기 및 아이콘 생성: 모든 영상 다운로드, 분석으로 가는 버튼도 지정
-        return render_template('uploaded copy.html', URL = url)
+        return render_template('uploaded.html', URL = url)
 
 @app.route('/analysis/')
 def anaylsis():
     return "뭐시기"
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
-
-'''
-1. SpoitWeb/static/temp 안에 있는 애들 compress 하기 ✅
-2. compress한 애를 aws s3에 업로드 (또는 로컬 기반으로 다운로드 가능케 하기) ✅
-3. 다운로드 버튼 만들기 ✅
-4. UI 개선
-
-5. AI 코치 심판 관련 파일 업로드
-6. waiting
-7. 분석 결과 출력
-
-8. 우분투로 서버 생성
-'''
+    app.run()
 
 # http://127.0.0.1:5000
