@@ -1,15 +1,20 @@
-from ultralytics import YOLO
-import supervision as sv
-import cv2
+from ultralytics import YOLO # 객체 탐지 모듈
+import supervision as sv # 객체 탐지 라벨링 모듈
+import cv2 # 컴퓨터 비전 관련 모듈
 from flask import Flask, render_template, request, redirect # 웹 프레임워크 관련 모듈
 from werkzeug.utils import secure_filename #링크 보안 관련 모듈
 import boto3 # 서버 관련 모듈
 import zipfile # 압축 관련 모듈
 import os # 경로 관련 모듈
 import shutil # 디렉토리의 내용 삭제 관련 모듈
-import logging
-from botocore.exceptions import NoCredentialsError, ClientError
+import logging # 서버 로그 모듈
+from botocore.exceptions import NoCredentialsError, ClientError # 서버 에러 핸들링 관련 모듈
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+os.chdir('../')
+logger.info(os.listdir('SpoitWeb'))
 s3 = boto3.client('s3')
 BUCKET_NAME = 'spoits3'
 DIRECTORY_NAME = 'user/'
@@ -45,8 +50,8 @@ def zip_images(folder_path, zip_filename):
     # Zip 파일을 생성하고 이미지 파일들을 압축합니다.
     with zipfile.ZipFile(zip_filename, 'w') as zipf:
         for file in file_list:
-            # 이미지 파일인 경우에만 압축합니다. 여기서는 확장자가 .jpg, .png, .gif로 가정합니다.
-            if file.lower().endswith(('.jpg', '.png', '.gif')):
+            # 이미지 파일인 경우에만 압축합니다. 여기서는 확장자가 .jpg, .png, .gif .jpeg로 가정합니다.
+            if file.lower().endswith(('.jpg', '.png', '.gif', 'jpeg')):
                 file_path = os.path.join(folder_path, file)
                 zipf.write(file_path, os.path.basename(file_path))
 
@@ -64,7 +69,7 @@ def detected_image_generator(image_path, ball_pt_path, player_pt_path, save_path
     colorScheme = sv.ColorPalette(colors = [sv.Color(r=222, g=159, b=248), sv.Color(r=179, g=253, b=178), sv.Color(r=231, g=129, b=52)])
     bounding_box_annotator = sv.BoundingBoxAnnotator()
     label_annotator = sv.LabelAnnotator(text_position = sv.Position.TOP_LEFT)
-    
+
     annotated_frame_player = bounding_box_annotator.annotate(
         scene = image.copy(),
         detections = detections_player
@@ -97,7 +102,7 @@ def get_images(folder_path):
     file_list = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
     ret = []
     for file in file_list:
-        if file.lower().endswith(('jpg', 'png', 'gif')):
+        if file.lower().endswith(('jpg', 'png', 'gif', 'jpeg')):
             file_path = os.path.join(folder_path, file)
             ret.append(file_path)
 
@@ -119,13 +124,14 @@ def upload():
         files = request.files.getlist('files')
 
         # 디렉토리를 초개화하는 작업 (user login 시스템을 갖출 경우, 각 user의 초기화가 필요)
-        directory_path = 'SpoitWeb/static/temp'
-        try:
-            os.makedirs(directory_path)
-        except FileExistsError:
-            # 디렉토리가 이미 존재하는 경우, 덮어쓰기
-            shutil.rmtree(directory_path)
-            os.makedirs(directory_path)
+        directory_paths = ['SpoitWeb/static/temp', 'SpoitWeb/static/detected']
+        for directory_path in directory_paths:
+            try:
+                os.makedirs(directory_path)
+            except FileExistsError:
+                # 디렉토리가 이미 존재하는 경우, 덮어쓰기
+                shutil.rmtree(directory_path)
+                os.makedirs(directory_path)
 
         #객체를 삽입하기 이전 객체를 초기화하는 작업
         if s3.list_objects_v2(Bucket = BUCKET_NAME)['KeyCount'] > 0:
@@ -151,13 +157,15 @@ def upload():
         img_dir_path = f'SpoitWeb/static/temp'
         zip_img_name = img_dir_path + '/images.zip'
         zip_images(img_dir_path, zip_img_name)
-        
+
         s3.upload_file(img_dir_path+"/images.zip", BUCKET_NAME, DIRECTORY_NAME + "images.zip")
 
         url1 = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
 
         # 객체 탐지
         detected_dir_path = 'SpoitWeb/static/detected'
+        
+
         img_file_paths = get_images(img_dir_path)
         for img_file_path in img_file_paths:
             detected_image_generator(img_file_path, 'SpoitWeb/static/models/ball.pt', 'SpoitWeb/static/models/players.pt', detected_dir_path)
