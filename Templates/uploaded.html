@@ -38,8 +38,10 @@
 								<header class="major">
 									<h1>AI<br />
 									객체 탐지</h1>
-									<a href="{{URL}}" download = "images.zip" class="button icon solid fa-download">Uploaded Images</a>
+									<a href="{{URL_original}}" download = "images.zip" class="button icon solid fa-download">Uploaded Images</a>
 									<p>위 버튼은 업로드된 이미지를 다시 다운 받습니다.</p>
+									<a href="{{URL_detected}}" download = "detected_images.zip" class="button icon solid fa-download">Detected Images</a>
+									<p>위 버튼은 객체 탐지된 이미지를 다운 받습니다.</p>
 								</header>
 								<!-- <div class="image main"><img src="images/detected.gif" alt="" /></div> -->
 								<span class="image fit"><img src="{{ url_for('static', filename='images/detected.png') }}" alt="detected" /></span>

@@ -1,3 +1,6 @@
+from ultralytics import YOLO
+import supervision as sv
+import cv2
 from flask import Flask, render_template, request, redirect # 웹 프레임워크 관련 모듈
 from werkzeug.utils import secure_filename #링크 보안 관련 모듈
 import boto3 # 서버 관련 모듈
@@ -47,6 +50,58 @@ def zip_images(folder_path, zip_filename):
                 file_path = os.path.join(folder_path, file)
                 zipf.write(file_path, os.path.basename(file_path))
 
+def detected_image_generator(image_path, ball_pt_path, player_pt_path, save_path):
+    image = cv2.imread(image_path)
+
+    model_ball = YOLO(ball_pt_path)
+    result_ball = model_ball(image)[0]
+    detections_ball = sv.Detections.from_ultralytics(result_ball)
+
+    model_player = YOLO(player_pt_path)
+    result_player = model_player(image)[0]
+    detections_player = sv.Detections.from_ultralytics(result_player)
+
+    colorScheme = sv.ColorPalette(colors = [sv.Color(r=222, g=159, b=248), sv.Color(r=179, g=253, b=178), sv.Color(r=231, g=129, b=52)])
+    bounding_box_annotator = sv.BoundingBoxAnnotator()
+    label_annotator = sv.LabelAnnotator(text_position = sv.Position.TOP_LEFT)
+    
+    annotated_frame_player = bounding_box_annotator.annotate(
+        scene = image.copy(),
+        detections = detections_player
+    )
+
+    annotated_frame_ball = bounding_box_annotator.annotate(
+        scene = annotated_frame_player,
+        detections = detections_ball
+    )
+
+    annotated_frame_player = label_annotator.annotate(
+        scene = annotated_frame_ball,
+        detections = detections_player,
+        labels = [
+            result_player.names[class_id] for class_id in detections_player.class_id
+        ]
+    )
+
+    annotated_frame_ball = label_annotator.annotate(
+        scene = annotated_frame_player,
+        detections = detections_ball,
+        labels = [
+            result_ball.names[class_id] for class_id in detections_ball.class_id
+        ]
+    )
+
+    cv2.imwrite(save_path + '/' + os.path.basename(image_path), annotated_frame_ball)
+
+def get_images(folder_path):
+    file_list = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+    ret = []
+    for file in file_list:
+        if file.lower().endswith(('jpg', 'png', 'gif')):
+            file_path = os.path.join(folder_path, file)
+            ret.append(file_path)
+
+    return ret
 
 @app.route('/')
 def index():
@@ -99,9 +154,23 @@ def upload():
         
         s3.upload_file(img_dir_path+"/images.zip", BUCKET_NAME, DIRECTORY_NAME + "images.zip")
 
-        url = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
+        url1 = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
+
+        # 객체 탐지
+        detected_dir_path = 'SpoitWeb/static/detected'
+        img_file_paths = get_images(img_dir_path)
+        for img_file_path in img_file_paths:
+            detected_image_generator(img_file_path, 'SpoitWeb/static/models/ball.pt', 'SpoitWeb/static/models/players.pt', detected_dir_path)
+
+        # 객체 탐지 zip 파일 생성
+        zip_images(detected_dir_path, detected_dir_path + '/detected_images.zip')
+
+        s3.upload_file(detected_dir_path + '/detected_images.zip', BUCKET_NAME, DIRECTORY_NAME + "detected_images.zip")
+
+        url2 = urlGenerate(s3, BUCKET_NAME, "user/detected_images.zip")
+
         #업로드가 완료되었습니다 창과 함께 모든 사진들을 html에 갤러리 모드로 보여주기 및 아이콘 생성: 모든 영상 다운로드, 분석으로 가는 버튼도 지정
-        return render_template('uploaded.html', URL = url)
+        return render_template('uploaded.html', URL_original = url1, URL_detected = url2)
 
 @app.route('/analysis/')
 def anaylsis():
