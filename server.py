@@ -1,24 +1,25 @@
 from ultralytics import YOLO # 객체 탐지 모듈
 import supervision as sv # 객체 탐지 라벨링 모듈
 import cv2 # 컴퓨터 비전 관련 모듈
-from flask import Flask, render_template, request, redirect # 웹 프레임워크 관련 모듈
-from werkzeug.utils import secure_filename #링크 보안 관련 모듈
+import multiprocessing # 멀티 프로세싱 관련 모듈
+from flask import Flask, render_template, request, redirect, jsonify # 웹 프레임워크 관련 모듈
+from werkzeug.utils import secure_filename # 링크 보안 관련 모듈
 import boto3 # 서버 관련 모듈
 import zipfile # 압축 관련 모듈
 import os # 경로 관련 모듈
 import shutil # 디렉토리의 내용 삭제 관련 모듈
 import logging # 서버 로그 모듈
 from botocore.exceptions import NoCredentialsError, ClientError # 서버 에러 핸들링 관련 모듈
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+import pandas as pd # 데이터 분석 모듈
+import mplsoccer # 축구 데이터 분석용 모듈
+import warnings # pandas warning 무시용
 
 os.chdir('../')
-logger.info(os.listdir('SpoitWeb'))
 s3 = boto3.client('s3')
 BUCKET_NAME = 'spoits3'
 DIRECTORY_NAME = 'user/'
 app = Flask(__name__)
+warnings.filterwarnings(action='ignore')
 
 def upload_to_s3(s3, file, bucket):
     try:
@@ -108,6 +109,145 @@ def get_images(folder_path):
 
     return ret
 
+def long_running_task_detection(files):
+    # 디렉토리를 초기화하는 작업 (user login 시스템을 갖출 경우, 각 user의 초기화가 필요)
+    directory_paths = ['SpoitWeb/static/temp', 'SpoitWeb/static/detected']
+    for directory_path in directory_paths:
+        try:
+            os.makedirs(directory_path)
+        except FileExistsError:
+            # 디렉토리가 이미 존재하는 경우, 덮어쓰기
+            shutil.rmtree(directory_path)
+            os.makedirs(directory_path)
+
+    #객체를 삽입하기 이전 객체를 초기화하는 작업
+    if s3.list_objects_v2(Bucket = BUCKET_NAME)['KeyCount'] > 0:
+        for elem in s3.list_objects_v2(Bucket = BUCKET_NAME)["Contents"]:
+            if elem['Key'].startswith("user/"):
+                s3.delete_object(Bucket=BUCKET_NAME, Key=elem['Key'])
+
+    # 객체 삽입 & temp 경로에 이미지 저장
+    for file in files:
+        print(file)
+        if file.filename == '':
+            return redirect(request.url)
+
+        secure_filename_str = secure_filename(file.filename)
+
+        save_path = f'SpoitWeb/static/temp/{secure_filename_str}'
+        file.save(save_path)
+
+        if not upload_to_s3(s3, file, BUCKET_NAME):
+            return 'Failed to upload one or more files to AWS S3.'
+
+    # zip 파일 생성
+    img_dir_path = f'SpoitWeb/static/temp'
+    zip_img_name = img_dir_path + '/images.zip'
+    zip_images(img_dir_path, zip_img_name)
+
+    s3.upload_file(img_dir_path+"/images.zip", BUCKET_NAME, DIRECTORY_NAME + "images.zip")
+
+    url1 = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
+
+    # 객체 탐지
+    detected_dir_path = 'SpoitWeb/static/detected'
+
+
+    img_file_paths = get_images(img_dir_path)
+    for img_file_path in img_file_paths:
+        detected_image_generator(img_file_path, 'SpoitWeb/static/models/ball.pt', 'SpoitWeb/static/models/players.pt', detected_dir_path)
+
+    # 객체 탐지 zip 파일 생성
+    zip_images(detected_dir_path, detected_dir_path + '/detected_images.zip')
+
+    s3.upload_file(detected_dir_path + '/detected_images.zip', BUCKET_NAME, DIRECTORY_NAME + "detected_images.zip")
+
+    url2 = urlGenerate(s3, BUCKET_NAME, "user/detected_images.zip")
+    return [url1, url2]
+
+def alternative_position(conc):
+    if conc in ['Center Forward', 'Left Center Forward', 'Right Center Forward', 'Left Wing', 'Right Wing']:
+        return 'Forward'
+    elif conc in ['Left Attacking Midfield', 'Right Attacking Midfield', 'Center Attacking Midfield', 'Secondary Striker', 'Right Midfield', 'Left Midfield', 'Left Center Midfield', 'Right Center Midfield']:
+        return 'Midfield'
+    elif conc in ['Left Wing Back', 'Left Back', 'Right Wing Back', 'Right Back']:
+        return 'Side Back'
+    elif conc in ['Left Center Back', 'Right Center Back', 'Center Back']:
+        return 'Center Back'
+    elif conc in ['Goalkeeper']:
+        return 'Goalkeeper'
+    else:
+        return 'Idk'
+
+def position_prediction_euclidean(predicted_pos, data):
+    player_x = data['x'].mean()
+    player_y = data['y'].mean()
+
+    min_dist = float('inf')
+    conc = ''
+
+    for i in range(len(predicted_pos)):
+        position_name, x, y = predicted_pos.iloc[i][0], predicted_pos.iloc[i][1], predicted_pos.iloc[i][2]
+        dist = ((x-player_x)**2 + (y-player_y)**2)**0.5
+        if min_dist > dist:
+            min_dist = dist
+            conc = position_name
+    return alternative_position(conc)
+
+def get_position_explanation(pos):
+    with open(f'SpoitWeb/static/coachDB/feature/{pos}.txt', 'r') as file:
+        data = file.read().replace('\n', '<br />')
+    return data
+
+def get_coach_recommendation(pos):
+    with open(f'SpoitWeb/static/coachDB/coach/{pos}.txt', 'r') as file:
+        data = file.read().replace('\n', '<br />')
+    return data
+
+def long_running_task_coach(files):
+    # 디렉토리를 초기화하는 작업 (user login 시스템을 갖출 경우, 각 user의 초기화가 필요)
+    directory_paths = ['SpoitWeb/static/original', 'SpoitWeb/static/heatmap']
+    for directory_path in directory_paths:
+        try:
+            os.makedirs(directory_path)
+        except FileExistsError:
+            # 디렉토리가 이미 존재하는 경우, 덮어쓰기
+            shutil.rmtree(directory_path)
+            os.makedirs(directory_path)
+
+    #객체를 삽입하기 이전 객체를 초기화하는 작업
+    if s3.list_objects_v2(Bucket = BUCKET_NAME)['KeyCount'] > 0:
+        for elem in s3.list_objects_v2(Bucket = BUCKET_NAME)["Contents"]:
+            if elem['Key'].startswith("user/"):
+                s3.delete_object(Bucket=BUCKET_NAME, Key=elem['Key'])
+
+    # original 경로에 csv 파일 저장
+    for file in files:
+        print(file)
+        if file.filename == '':
+            return redirect(request.url)
+
+        secure_filename_str = secure_filename(file.filename)
+
+        save_path = f'SpoitWeb/static/original/{secure_filename_str}'
+        file.save(save_path)
+
+        if not upload_to_s3(s3, file, BUCKET_NAME):
+            return 'Failed to upload one or more files to AWS S3.'
+
+    # 파일 업로드
+    s3.upload_file(save_path, BUCKET_NAME, DIRECTORY_NAME + f"{secure_filename_str}")
+    url1 = urlGenerate(s3, BUCKET_NAME, "user/{secure_filename_str}")
+
+    # 포지션별 평균 위치 데이터 불러오기 및 euclidean distance 계산해서 최고의 포지션 예측하기
+    position_path = 'SpoitWeb/static/coachDB/position_xy.csv'
+    predicted_pos = pd.read_csv(position_path)
+    predicted_pos_ret = position_prediction_euclidean(predicted_pos, data)
+    position_explanation = get_position_explanation(predicted_pos_ret)
+    coach_recommendation = get_coach_recommendation(predicted_pos_ret)
+
+    return [url1, position_explanation, coach_recommendation]
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -116,75 +256,31 @@ def index():
 def explanation():
     return render_template('explanation.html')
 
-@app.route('/upload/', methods = ['GET', 'POST'])
+@app.route('/upload_detection/', methods = ['GET', 'POST'])
 def upload():
     if request.method == 'GET':
         return render_template('upload.html')
     elif request.method == 'POST':
         files = request.files.getlist('files')
+        urls = long_running_task_detection(files)
+        # 업로드가 완료되었습니다 창과 함께 모든 사진들을 html에 갤러리 모드로 보여주기 및 아이콘 생성: 모든 영상 다운로드, 분석으로 가는 버튼도 지정
+        # return render_template('loading.html', task_id = task.id)
+        return render_template('uploaded_detection.html', URL_original = urls[0], URL_detected = urls[1])
 
-        # 디렉토리를 초개화하는 작업 (user login 시스템을 갖출 경우, 각 user의 초기화가 필요)
-        directory_paths = ['SpoitWeb/static/temp', 'SpoitWeb/static/detected']
-        for directory_path in directory_paths:
-            try:
-                os.makedirs(directory_path)
-            except FileExistsError:
-                # 디렉토리가 이미 존재하는 경우, 덮어쓰기
-                shutil.rmtree(directory_path)
-                os.makedirs(directory_path)
-
-        #객체를 삽입하기 이전 객체를 초기화하는 작업
-        if s3.list_objects_v2(Bucket = BUCKET_NAME)['KeyCount'] > 0:
-            for elem in s3.list_objects_v2(Bucket = BUCKET_NAME)["Contents"]:
-                if elem['Key'].startswith("user/"):
-                    s3.delete_object(Bucket=BUCKET_NAME, Key=elem['Key'])
-
-        # 객체 삽입 & temp 경로에 이미지 저장
-        for file in files:
-            print(file)
-            if file.filename == '':
-                return redirect(request.url)
-            
-            secure_filename_str = secure_filename(file.filename)
-
-            save_path = f'SpoitWeb/static/temp/{secure_filename_str}'
-            file.save(save_path)
-
-            if not upload_to_s3(s3, file, BUCKET_NAME):
-                return 'Failed to upload one or more files to AWS S3.'
-        
-        # zip 파일 생성
-        img_dir_path = f'SpoitWeb/static/temp'
-        zip_img_name = img_dir_path + '/images.zip'
-        zip_images(img_dir_path, zip_img_name)
-
-        s3.upload_file(img_dir_path+"/images.zip", BUCKET_NAME, DIRECTORY_NAME + "images.zip")
-
-        url1 = urlGenerate(s3, BUCKET_NAME, "user/images.zip")
-
-        # 객체 탐지
-        detected_dir_path = 'SpoitWeb/static/detected'
-        
-
-        img_file_paths = get_images(img_dir_path)
-        for img_file_path in img_file_paths:
-            detected_image_generator(img_file_path, 'SpoitWeb/static/models/ball.pt', 'SpoitWeb/static/models/players.pt', detected_dir_path)
-
-        # 객체 탐지 zip 파일 생성
-        zip_images(detected_dir_path, detected_dir_path + '/detected_images.zip')
-
-        s3.upload_file(detected_dir_path + '/detected_images.zip', BUCKET_NAME, DIRECTORY_NAME + "detected_images.zip")
-
-        url2 = urlGenerate(s3, BUCKET_NAME, "user/detected_images.zip")
-
-        #업로드가 완료되었습니다 창과 함께 모든 사진들을 html에 갤러리 모드로 보여주기 및 아이콘 생성: 모든 영상 다운로드, 분석으로 가는 버튼도 지정
-        return render_template('uploaded.html', URL_original = url1, URL_detected = url2)
+@app.route('upload_coach/', methods = ['GET', 'POST'])
+def upload():
+    if request.method == 'GET':
+        return render_template('upload.html')
+    elif request.method == 'POST':
+        files = request.files.getlist('files')
+        rets = long_running_task_coach(files)
+        return render_template('uploaded_coach.html', URL_original = rets[0], feature_explanation = rets[1], coach_explanation = rets[2])
 
 @app.route('/analysis/')
 def anaylsis():
     return "뭐시기"
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0')
+    app.run(host = '0.0.0.0', port = 8080)
 
 # http://127.0.0.1:5000

@@ -1,0 +1,31 @@
+<!-- loading.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+</head>
+<body>
+    <h1>Loading...</h1>
+    <script>
+        // Use JavaScript to poll the task status and redirect when it's completed
+        function checkTaskStatus(taskId) {
+            fetch(`/check-status/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'SUCCESS') {
+                        window.location.href = `/result/${taskId}`;
+                    } else if (data.status === 'FAILURE') {
+                        window.location.href = '/error';
+                    } else {
+                        setTimeout(() => checkTaskStatus(taskId), 1000);
+                    }
+                });
+        }
+
+        const taskId = '{{ task_id }}';
+        checkTaskStatus(taskId);
+    </script>
+</body>
+</html>
