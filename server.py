@@ -1,3 +1,12 @@
+# 골 디택션 모듈
+from __future __ import annotations
+from typing import List, Tuple
+from supervision.video.sink import VideoSink
+import torch
+from supervision.video.dataclasses import VideoInfo
+from supervision.video.source import get_video_frames_generator
+from shapely.geometry import Point, Polygon
+
 from ultralytics import YOLO # 객체 탐지 모듈
 import supervision as sv # 객체 탐지 라벨링 모듈
 import cv2 # 컴퓨터 비전 관련 모듈
@@ -14,6 +23,7 @@ import mplsoccer # 축구 데이터 분석용 모듈
 import warnings # pandas warning 무시용
 from tqdm import tqdm
 from markupsafe import Markup
+
 
 os.chdir('../')
 s3 = boto3.client('s3')
@@ -67,18 +77,17 @@ def detected_image_generator(image_path, save_path):
     result = detection_model(image)[0]
     detections = sv.Detections.from_ultralytics(result)
 
-    colorScheme = sv.ColorPalette(colors = [sv.Color(r=222, g=159, b=248), sv.Color(r=179, g=253, b=178), sv.Color(r=231, g=129, b=52)])
     bounding_box_annotator = sv.BoundingBoxAnnotator()
     label_annotator = sv.LabelAnnotator(text_position = sv.Position.TOP_LEFT)
 
     annotated_frame_box = bounding_box_annotator.annotate(
         scene = image.copy(),
-        detections = detection_model
+        detections = detections
     )
 
     annotated_frame_label = label_annotator.annotate(
         scene = annotated_frame_box,
-        detections = detection_model,
+        detections = detections,
         labels = [
             result.names[class_id] for class_id in detections.class_id
         ]
@@ -286,6 +295,15 @@ def upload_coach():
         files = request.files.getlist('files')
         rets = long_running_task_coach(files)
         return render_template('uploaded_coach.html', URL_original = rets[0], position_name = rets[1], feature_explanation = Markup(rets[2]), coach_explanation = Markup(rets[3]))
+
+@app.route('/upload_goal/', methods = ['GET', 'POST'])
+def upload_goal():
+    if request.method == 'GET':
+        return render_template('upload_goal.html')
+    elif request.method == 'POST':
+        files = request.files.getlist('files')
+        rets = long_running_task_goal(files)
+        return render_template('uploaded_goal.html')
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port = 8080)
