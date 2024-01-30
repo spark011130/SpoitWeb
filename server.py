@@ -1,7 +1,6 @@
 from ultralytics import YOLO # 객체 탐지 모듈
 import supervision as sv # 객체 탐지 라벨링 모듈
 import cv2 # 컴퓨터 비전 관련 모듈
-import multiprocessing # 멀티 프로세싱 관련 모듈
 from flask import Flask, render_template, request, redirect, jsonify # 웹 프레임워크 관련 모듈
 from werkzeug.utils import secure_filename # 링크 보안 관련 모듈
 import boto3 # 서버 관련 모듈
@@ -23,10 +22,8 @@ DIRECTORY_NAME = 'user/'
 app = Flask(__name__)
 warnings.filterwarnings(action='ignore')
 
-ball_pt_path ='SpoitWeb/static/models/ball.pt'
-model_ball = YOLO(ball_pt_path)
-player_pt_path = 'SpoitWeb/static/models/players.pt' 
-model_player = YOLO(player_pt_path)
+ball_pt_path ='SpoitWeb/static/models/best.pt'
+detection_model = YOLO(ball_pt_path)
 
 def upload_to_s3(s3, file, bucket):
     try:
@@ -67,43 +64,27 @@ def zip_images(folder_path, zip_filename):
 def detected_image_generator(image_path, save_path):
     image = cv2.imread(image_path)
 
-    result_ball = model_ball(image)[0]
-    detections_ball = sv.Detections.from_ultralytics(result_ball)
-
-    result_player = model_player(image)[0]
-    detections_player = sv.Detections.from_ultralytics(result_player)
+    result = detection_model(image)[0]
+    detections = sv.Detections.from_ultralytics(result)
 
     colorScheme = sv.ColorPalette(colors = [sv.Color(r=222, g=159, b=248), sv.Color(r=179, g=253, b=178), sv.Color(r=231, g=129, b=52)])
     bounding_box_annotator = sv.BoundingBoxAnnotator()
     label_annotator = sv.LabelAnnotator(text_position = sv.Position.TOP_LEFT)
 
-    annotated_frame_player = bounding_box_annotator.annotate(
+    annotated_frame_box = bounding_box_annotator.annotate(
         scene = image.copy(),
-        detections = detections_player
+        detections = detection_model
     )
 
-    annotated_frame_ball = bounding_box_annotator.annotate(
-        scene = annotated_frame_player,
-        detections = detections_ball
-    )
-
-    annotated_frame_player = label_annotator.annotate(
-        scene = annotated_frame_ball,
-        detections = detections_player,
+    annotated_frame_label = label_annotator.annotate(
+        scene = annotated_frame_box,
+        detections = detection_model,
         labels = [
-            result_player.names[class_id] for class_id in detections_player.class_id
+            result.names[class_id] for class_id in detections.class_id
         ]
     )
 
-    annotated_frame_ball = label_annotator.annotate(
-        scene = annotated_frame_player,
-        detections = detections_ball,
-        labels = [
-            result_ball.names[class_id] for class_id in detections_ball.class_id
-        ]
-    )
-
-    cv2.imwrite(save_path + '/' + os.path.basename(image_path), annotated_frame_ball)
+    cv2.imwrite(save_path + '/' + os.path.basename(image_path), annotated_frame_label)
 
 def get_images(folder_path):
     file_list = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
@@ -200,8 +181,7 @@ def alternative_position(conc):
         return 'Center Back'
     elif conc in ['Goalkeeper']:
         return 'Goalkeeper'
-    else:
-        return 'Idk'
+    return 'not known'
 
 def position_prediction_euclidean(predicted_pos, data):
     player_x = data['x'].mean()
