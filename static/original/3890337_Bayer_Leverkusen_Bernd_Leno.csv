@@ -1,0 +1,26 @@
+,period,timestamp,minute,second,type_name,player_name,team_name,play_pattern_name,pass_length,pass_height_name,x,y,end_x,end_y
+1,1,00:00:22.229000,0,22,Pass,Bernd Leno,Bayer Leverkusen,From Kick Off,12.728315,Ground Pass,17.8,47.4,27.7,55.4
+2,1,00:03:42.898000,3,42,Pass,Bernd Leno,Bayer Leverkusen,From Keeper,19.24396,Ground Pass,9.6,49.4,21.9,64.2
+3,1,00:14:29.053000,14,29,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,30.06676,Ground Pass,21.6,44.6,36.7,70.6
+4,1,00:16:50.924000,16,50,Pass,Bernd Leno,Bayer Leverkusen,From Goal Kick,70.73083,High Pass,6.0,44.0,76.6,48.3
+5,1,00:18:46.591000,18,46,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,22.852789,Ground Pass,6.4,27.2,16.7,47.6
+6,1,00:21:11.793000,21,11,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,42.206398,High Pass,16.1,23.3,57.4,14.6
+7,1,00:22:17.108000,22,17,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,13.641848,Ground Pass,16.4,48.5,22.3,60.8
+8,1,00:22:20.872000,22,20,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,58.706898,High Pass,10.5,49.2,69.2,50.1
+9,1,00:26:40.998000,26,40,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,48.82059,High Pass,16.2,36.0,63.0,49.9
+10,1,00:29:36.603000,29,36,Pass,Bernd Leno,Bayer Leverkusen,From Corner,68.41871,High Pass,15.5,33.3,75.1,66.9
+11,1,00:33:35.723000,33,35,Pass,Bernd Leno,Bayer Leverkusen,From Goal Kick,69.03289,High Pass,6.0,44.0,73.7,30.5
+12,1,00:41:03.675000,41,3,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,54.8621,High Pass,9.3,20.3,62.9,8.6
+13,2,00:00:25.318000,45,25,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,12.287392,Ground Pass,14.6,27.6,24.9,20.9
+14,2,00:01:43.423000,46,43,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,15.10298,Ground Pass,7.0,38.9,16.3,50.8
+15,2,00:02:59.457000,47,59,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,81.44311,High Pass,27.1,47.8,93.4,0.5
+16,2,00:05:17.408000,50,17,Pass,Bernd Leno,Bayer Leverkusen,From Goal Kick,74.3113,High Pass,7.0,44.1,81.1,49.7
+17,2,00:12:42.224000,57,42,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,55.91288,High Pass,7.6,44.4,62.8,35.5
+18,2,00:14:42.642000,59,42,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,57.83122,High Pass,2.8,56.0,60.6,54.1
+19,2,00:16:05.878000,61,5,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,30.241858,Ground Pass,14.5,32.4,40.1,48.5
+20,2,00:28:22.149000,73,22,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,7.5166483,Ground Pass,7.5,41.0,13.8,36.9
+21,2,00:29:27.971000,74,27,Pass,Bernd Leno,Bayer Leverkusen,From Free Kick,31.257,Ground Pass,14.0,41.8,29.4,69.0
+22,2,00:37:26.695000,82,26,Pass,Bernd Leno,Bayer Leverkusen,From Throw In,62.33434,High Pass,24.7,46.0,86.8,40.6
+23,2,00:38:50.589000,83,50,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,63.356926,High Pass,1.9,58.8,64.6,49.7
+24,2,00:40:55.325000,85,55,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,23.364931,Ground Pass,17.0,61.6,35.4,76.0
+25,2,00:47:30.356000,92,30,Pass,Bernd Leno,Bayer Leverkusen,Regular Play,27.250137,Ground Pass,14.5,44.8,32.9,64.9

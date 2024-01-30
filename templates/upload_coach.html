@@ -45,9 +45,9 @@
 								<header class="major">
 									<h1><a href="#">파일 업로드</a></h1>
 								</header>
-								<form method="POST" action="/upload/" enctype="multipart/form-data">
+								<form method="POST" action="/upload_coach/" enctype="multipart/form-data">
 									<label for = "file" class="button primary">파일 선택</label>
-									<input type="file" id="file" name="files" accept=".jpg, .jpeg, .png, .gif" multiple onchange="previewFiles()" />
+									<input type="file" id="file" name="files" accept=".csv" onchange="previewFiles()" />
 									<div id="file-list" style="overflow: auto; height: 250px;" class = "box"></div>
 									<div id="file-count">총 <span id="count">0</span>개의 파일이 선택 되었습니다.</div>
 									<!-- <button type="submit" class="file-upload-btn"">파일 업로드</button> -->

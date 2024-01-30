@@ -13,6 +13,8 @@ from botocore.exceptions import NoCredentialsError, ClientError # 서버 에러 
 import pandas as pd # 데이터 분석 모듈
 import mplsoccer # 축구 데이터 분석용 모듈
 import warnings # pandas warning 무시용
+from tqdm import tqdm
+from markupsafe import Markup
 
 os.chdir('../')
 s3 = boto3.client('s3')
@@ -21,9 +23,15 @@ DIRECTORY_NAME = 'user/'
 app = Flask(__name__)
 warnings.filterwarnings(action='ignore')
 
+ball_pt_path ='SpoitWeb/static/models/ball.pt'
+model_ball = YOLO(ball_pt_path)
+player_pt_path = 'SpoitWeb/static/models/players.pt' 
+model_player = YOLO(player_pt_path)
+
 def upload_to_s3(s3, file, bucket):
     try:
-        s3.upload_fileobj(file, bucket, (DIRECTORY_NAME + file.filename))
+        secure_filename_str = secure_filename(file.filename)
+        s3.upload_fileobj(file, bucket, (DIRECTORY_NAME + secure_filename_str))
         return True
     except NoCredentialsError:
         return False
@@ -56,14 +64,12 @@ def zip_images(folder_path, zip_filename):
                 file_path = os.path.join(folder_path, file)
                 zipf.write(file_path, os.path.basename(file_path))
 
-def detected_image_generator(image_path, ball_pt_path, player_pt_path, save_path):
+def detected_image_generator(image_path, save_path):
     image = cv2.imread(image_path)
 
-    model_ball = YOLO(ball_pt_path)
     result_ball = model_ball(image)[0]
     detections_ball = sv.Detections.from_ultralytics(result_ball)
 
-    model_player = YOLO(player_pt_path)
     result_player = model_player(image)[0]
     detections_player = sv.Detections.from_ultralytics(result_player)
 
@@ -154,8 +160,8 @@ def long_running_task_detection(files):
 
 
     img_file_paths = get_images(img_dir_path)
-    for img_file_path in img_file_paths:
-        detected_image_generator(img_file_path, 'SpoitWeb/static/models/ball.pt', 'SpoitWeb/static/models/players.pt', detected_dir_path)
+    for img_file_path in tqdm(img_file_paths):
+        detected_image_generator(img_file_path, detected_dir_path)
 
     # 객체 탐지 zip 파일 생성
     zip_images(detected_dir_path, detected_dir_path + '/detected_images.zip')
@@ -164,6 +170,24 @@ def long_running_task_detection(files):
 
     url2 = urlGenerate(s3, BUCKET_NAME, "user/detected_images.zip")
     return [url1, url2]
+
+class Plot():
+  def __init__(self):
+    self.pitch = mplsoccer.Pitch(pitch_color = 'grass', line_color = 'white')
+    self.fig, self.ax = self.pitch.draw(figsize = (20,15))
+  def call_plot(self):
+    return self.pitch, self.fig, self.ax
+  def set_title(self, title):
+    self.ax.set_title(title)
+  def save_image(self):
+    self.fig.savefig(f'SpoitWeb/static/images/heatmap.png')
+
+def heatmap(pass_df, plot):
+  pitch, fig, ax = plot.call_plot()
+  kde = pitch.kdeplot(
+      x = pass_df['x'], y = pass_df['y'], ax = ax,
+      fill = True, thresh = 0.05, alpha = .5, levels = 50, cmap = 'viridis'
+  )
 
 def alternative_position(conc):
     if conc in ['Center Forward', 'Left Center Forward', 'Right Center Forward', 'Left Wing', 'Right Wing']:
@@ -206,7 +230,7 @@ def get_coach_recommendation(pos):
 
 def long_running_task_coach(files):
     # 디렉토리를 초기화하는 작업 (user login 시스템을 갖출 경우, 각 user의 초기화가 필요)
-    directory_paths = ['SpoitWeb/static/original', 'SpoitWeb/static/heatmap']
+    directory_paths = ['SpoitWeb/static/original']
     for directory_path in directory_paths:
         try:
             os.makedirs(directory_path)
@@ -237,16 +261,23 @@ def long_running_task_coach(files):
 
     # 파일 업로드
     s3.upload_file(save_path, BUCKET_NAME, DIRECTORY_NAME + f"{secure_filename_str}")
-    url1 = urlGenerate(s3, BUCKET_NAME, "user/{secure_filename_str}")
+    url1 = urlGenerate(s3, BUCKET_NAME, DIRECTORY_NAME + f"{secure_filename_str}")
 
     # 포지션별 평균 위치 데이터 불러오기 및 euclidean distance 계산해서 최고의 포지션 예측하기
     position_path = 'SpoitWeb/static/coachDB/position_xy.csv'
     predicted_pos = pd.read_csv(position_path)
+    data = pd.read_csv(save_path)
     predicted_pos_ret = position_prediction_euclidean(predicted_pos, data)
     position_explanation = get_position_explanation(predicted_pos_ret)
     coach_recommendation = get_coach_recommendation(predicted_pos_ret)
 
-    return [url1, position_explanation, coach_recommendation]
+    # 히트맵 만들기
+    map = Plot()
+    map.set_title("Player Passmap (=>)")
+    heatmap(data, map)
+    map.save_image()
+
+    return [url1, predicted_pos_ret, position_explanation, coach_recommendation]
 
 @app.route('/')
 def index():
@@ -257,9 +288,9 @@ def explanation():
     return render_template('explanation.html')
 
 @app.route('/upload_detection/', methods = ['GET', 'POST'])
-def upload():
+def upload_detection():
     if request.method == 'GET':
-        return render_template('upload.html')
+         return render_template('upload_detection.html')
     elif request.method == 'POST':
         files = request.files.getlist('files')
         urls = long_running_task_detection(files)
@@ -267,18 +298,14 @@ def upload():
         # return render_template('loading.html', task_id = task.id)
         return render_template('uploaded_detection.html', URL_original = urls[0], URL_detected = urls[1])
 
-@app.route('upload_coach/', methods = ['GET', 'POST'])
-def upload():
+@app.route('/upload_coach/', methods = ['GET', 'POST'])
+def upload_coach():
     if request.method == 'GET':
-        return render_template('upload.html')
+        return render_template('upload_coach.html')
     elif request.method == 'POST':
         files = request.files.getlist('files')
         rets = long_running_task_coach(files)
-        return render_template('uploaded_coach.html', URL_original = rets[0], feature_explanation = rets[1], coach_explanation = rets[2])
-
-@app.route('/analysis/')
-def anaylsis():
-    return "뭐시기"
+        return render_template('uploaded_coach.html', URL_original = rets[0], position_name = rets[1], feature_explanation = Markup(rets[2]), coach_explanation = Markup(rets[3]))
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port = 8080)
