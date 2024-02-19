@@ -1,0 +1,87 @@
+,period,timestamp,minute,second,type_name,player_name,team_name,play_pattern_name,pass_length,pass_height_name,x,y,end_x,end_y
+1,1,00:01:33.680000,1,33,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,10.0,Ground Pass,88.0,77.0,82.0,69.0
+2,1,00:01:40.013000,1,40,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,13.038404,Ground Pass,62.0,74.0,61.0,61.0
+3,1,00:01:49.973000,1,49,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,54.626,Low Pass,68.0,77.0,118.0,55.0
+4,1,00:03:21.573000,3,21,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,20.59126,High Pass,12.0,38.0,22.0,20.0
+5,1,00:05:09.733000,5,9,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.486833,Ground Pass,58.0,76.0,55.0,67.0
+6,1,00:06:56.053000,6,56,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,7.2111025,Ground Pass,35.0,76.0,39.0,70.0
+7,1,00:08:30.093000,8,30,Pass,Mohammed Al Burayk,Saudi Arabia,From Corner,16.27882,Low Pass,85.0,37.0,73.0,26.0
+8,1,00:10:13.013000,10,13,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,12.206555,Ground Pass,67.0,71.0,57.0,64.0
+9,1,00:10:15.533000,10,15,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.486833,Ground Pass,63.0,75.0,66.0,66.0
+10,1,00:10:18.055000,10,18,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,28.42534,Ground Pass,55.0,75.0,33.0,57.0
+11,1,00:10:21.373000,10,21,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,28.01785,Ground Pass,40.0,72.0,41.0,44.0
+12,1,00:10:43.333000,10,43,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,14.422205,Ground Pass,92.0,75.0,84.0,63.0
+13,1,00:10:48.213000,10,48,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.27882,Ground Pass,79.0,74.0,82.0,58.0
+14,1,00:11:58.453000,11,58,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,13.601471,High Pass,28.0,68.0,39.0,76.0
+15,1,00:13:23.213000,13,23,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,27.658634,Ground Pass,78.0,74.0,72.0,47.0
+16,1,00:14:55.040000,14,55,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,14.035668,Low Pass,55.0,68.0,54.0,54.0
+17,1,00:15:17.253000,15,17,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,21.400934,Ground Pass,100.0,71.0,87.0,54.0
+18,1,00:15:27.493000,15,27,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,9.219544,Ground Pass,82.0,65.0,89.0,59.0
+19,1,00:15:40.373000,15,40,Pass,Mohammed Al Burayk,Saudi Arabia,From Counter,11.7046995,Low Pass,12.0,50.0,23.0,46.0
+20,1,00:17:01.693000,17,1,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,5.3851647,Low Pass,45.0,80.0,47.0,75.0
+21,1,00:17:05.653000,17,5,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,63.1981,Low Pass,33.0,70.0,38.0,7.0
+22,1,00:17:25.493000,17,25,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,21.377558,Ground Pass,83.0,77.0,79.0,56.0
+23,1,00:17:40.293000,17,40,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,67.26812,High Pass,106.0,69.0,112.0,2.0
+24,1,00:18:24.200000,18,24,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,15.6205,Ground Pass,45.0,73.0,55.0,61.0
+25,1,00:18:27.853000,18,27,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,19.104973,Ground Pass,47.0,75.0,49.0,56.0
+26,1,00:18:31.613000,18,31,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,25.079872,Ground Pass,38.0,70.0,28.0,47.0
+27,1,00:19:07.693000,19,7,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,45.17743,High Pass,53.0,69.0,93.0,48.0
+28,1,00:20:11.893000,20,11,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,23.194826,Ground Pass,79.0,74.0,82.0,51.0
+29,1,00:20:15.013000,20,15,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,20.396078,Ground Pass,64.0,67.0,68.0,47.0
+30,1,00:20:30.613000,20,30,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.486833,Ground Pass,93.0,75.0,102.0,78.0
+31,1,00:21:13.040000,21,13,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.40122,Ground Pass,66.0,68.0,56.0,55.0
+32,1,00:22:47.920000,22,47,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,6.4031243,High Pass,82.0,75.0,87.0,71.0
+33,1,00:25:55.413000,25,55,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,18.681541,Ground Pass,88.0,67.0,83.0,49.0
+34,1,00:26:00.493000,26,0,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,22.135944,Ground Pass,76.0,57.0,83.0,36.0
+35,1,00:29:11.973000,29,11,Pass,Mohammed Al Burayk,Saudi Arabia,From Free Kick,32.55764,Ground Pass,69.0,78.0,45.0,56.0
+36,1,00:30:36.400000,30,36,Pass,Mohammed Al Burayk,Saudi Arabia,From Free Kick,51.47815,High Pass,93.0,74.0,118.0,29.0
+37,1,00:32:13.413000,32,13,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,13.038404,Ground Pass,88.0,66.0,99.0,73.0
+38,1,00:36:25.773000,36,25,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,12.806249,Ground Pass,95.0,73.0,87.0,63.0
+39,1,00:37:23.413000,37,23,Pass,Mohammed Al Burayk,Saudi Arabia,From Corner,20.0,Low Pass,89.0,29.0,69.0,29.0
+40,1,00:45:22.933000,45,22,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,25.0,Ground Pass,24.0,66.0,4.0,51.0
+41,1,00:45:44.573000,45,44,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,18.384777,Ground Pass,88.0,76.0,81.0,59.0
+42,2,00:01:14.053000,46,14,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,12.083046,Ground Pass,35.0,79.0,46.0,74.0
+43,2,00:01:18.693000,46,18,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,11.045361,Ground Pass,37.0,79.0,38.0,68.0
+44,2,00:01:58.933000,46,58,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.763054,Ground Pass,59.0,77.0,54.0,61.0
+45,2,00:02:51.693000,47,51,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.433981,Ground Pass,90.0,73.0,98.0,78.0
+46,2,00:03:03.320000,48,3,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,18.681541,Ground Pass,104.0,75.0,109.0,57.0
+47,2,00:03:56.520000,48,56,Pass,Mohammed Al Burayk,Saudi Arabia,From Corner,13.341664,Low Pass,112.0,59.0,109.0,46.0
+48,2,00:04:12.880000,49,12,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,8.062258,Low Pass,64.0,80.0,57.0,76.0
+49,2,00:04:41.560000,49,41,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,10.0,Ground Pass,66.0,78.0,66.0,68.0
+50,2,00:04:44.173000,49,44,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,6.0827627,Ground Pass,63.0,78.0,69.0,77.0
+51,2,00:05:05.373000,50,5,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,23.323807,Ground Pass,74.0,78.0,54.0,66.0
+52,2,00:05:08.573000,50,8,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,8.062258,Ground Pass,54.0,78.0,53.0,70.0
+53,2,00:05:34.080000,50,34,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,66.48308,High Pass,74.0,66.0,98.0,4.0
+54,2,00:06:00.293000,51,0,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,1.4142135,Ground Pass,92.0,70.0,91.0,71.0
+55,2,00:06:23.533000,51,23,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,6.0827627,Low Pass,69.0,80.0,63.0,79.0
+56,2,00:08:01.813000,53,1,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.124516,Ground Pass,85.0,78.0,93.0,64.0
+57,2,00:08:13.733000,53,13,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.219544,Ground Pass,82.0,77.0,84.0,68.0
+58,2,00:08:19.933000,53,19,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,24.758837,Ground Pass,73.0,77.0,55.0,60.0
+59,2,00:08:44.133000,53,44,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,40.012497,Ground Pass,67.0,64.0,68.0,24.0
+60,2,00:08:55.160000,53,55,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,31.38471,High Pass,103.0,74.0,115.0,45.0
+61,2,00:11:34.133000,56,34,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,11.401754,Ground Pass,57.0,77.0,60.0,66.0
+62,2,00:11:57.093000,56,57,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,14.866069,Ground Pass,65.0,78.0,54.0,68.0
+63,2,00:13:01.613000,58,1,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,12.727922,Ground Pass,85.0,77.0,76.0,68.0
+64,2,00:13:08.720000,58,8,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,15.297058,Ground Pass,72.0,62.0,75.0,77.0
+65,2,00:13:13.693000,58,13,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,10.0,Ground Pass,73.0,66.0,73.0,76.0
+66,2,00:15:34.373000,60,34,Pass,Mohammed Al Burayk,Saudi Arabia,From Free Kick,15.524175,Ground Pass,79.0,78.0,75.0,63.0
+67,2,00:17:29.160000,62,29,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.643316,Ground Pass,100.0,77.0,91.0,63.0
+68,2,00:20:31.600000,65,31,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,18.0,Ground Pass,64.0,73.0,64.0,55.0
+69,2,00:23:24.293000,68,24,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,12.649111,Low Pass,100.0,80.0,88.0,76.0
+70,2,00:26:02.213000,71,2,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,16.03122,Ground Pass,64.0,70.0,63.0,54.0
+71,2,00:26:08.133000,71,8,Pass,Mohammed Al Burayk,Saudi Arabia,From Goal Kick,33.24154,Ground Pass,35.0,66.0,4.0,54.0
+72,2,00:26:41.093000,71,41,Pass,Mohammed Al Burayk,Saudi Arabia,From Free Kick,17.888544,Ground Pass,42.0,78.0,34.0,62.0
+73,2,00:35:50.760000,80,50,Pass,Mohammed Al Burayk,Saudi Arabia,From Throw In,25.059929,Low Pass,108.0,80.0,86.0,68.0
+74,2,00:36:29.853000,81,29,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,22.135944,Ground Pass,68.0,56.0,75.0,35.0
+75,2,00:38:06.493000,83,6,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.219544,Ground Pass,74.0,72.0,65.0,70.0
+76,2,00:42:30.533000,87,30,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,11.661903,Ground Pass,47.0,78.0,53.0,68.0
+77,2,00:43:25.160000,88,25,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,11.401754,Ground Pass,99.0,72.0,96.0,61.0
+78,2,00:43:28.813000,88,28,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,20.248457,Low Pass,91.0,78.0,84.0,59.0
+79,2,00:45:17.293000,90,17,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,10.440307,Ground Pass,86.0,78.0,83.0,68.0
+80,2,00:45:20.840000,90,20,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,12.0415945,Low Pass,69.0,68.0,77.0,59.0
+81,2,00:45:24.373000,90,24,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,9.055386,Ground Pass,67.0,61.0,76.0,62.0
+82,2,00:45:59.080000,90,59,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,17.20465,Ground Pass,58.0,65.0,68.0,79.0
+83,2,00:46:02.613000,91,2,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,13.038404,Ground Pass,67.0,66.0,60.0,77.0
+84,2,00:48:25.973000,93,25,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,22.090721,Low Pass,71.0,78.0,93.0,76.0
+85,2,00:48:53.453000,93,53,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,8.602325,Ground Pass,92.0,78.0,97.0,71.0
+86,2,00:49:03.213000,94,3,Pass,Mohammed Al Burayk,Saudi Arabia,Regular Play,16.27882,Ground Pass,112.0,68.0,109.0,52.0

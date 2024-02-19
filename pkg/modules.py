@@ -1,10 +1,10 @@
 # 골 디택션 모듈
-from __future __ import annotations
+from __future__ import annotations
 from typing import List, Tuple
-from supervision.video.sink import VideoSink
+from supervision import VideoSink
 import torch
-from supervision.video.dataclasses import VideoInfo
-from supervision.video.source import get_video_frames_generator
+from supervision import VideoInfo
+from supervision import get_video_frames_generator
 from shapely.geometry import Point, Polygon
 
 from ultralytics import YOLO # 객체 탐지 모듈

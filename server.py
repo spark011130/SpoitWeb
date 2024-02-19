@@ -243,9 +243,6 @@ def long_running_task_coach(files):
 
     return [url1, predicted_pos_ret, position_explanation, coach_recommendation]
 
-def long_running_task_goal():
-    pass
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -273,15 +270,6 @@ def upload_coach():
         files = request.files.getlist('files')
         rets = long_running_task_coach(files)
         return render_template('uploaded_coach.html', URL_original = rets[0], position_name = rets[1], feature_explanation = Markup(rets[2]), coach_explanation = Markup(rets[3]))
-
-@app.route('/upload_goal/', methods = ['GET', 'POST'])
-def upload_goal():
-    if request.method == 'GET':
-        return render_template('upload_goal.html')
-    elif request.method == 'POST':
-        files = request.files.getlist('files')
-        rets = long_running_task_goal(files)
-        return render_template('uploaded_goal.html')
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port = 8080)
