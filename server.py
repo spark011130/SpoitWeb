@@ -1,4 +1,28 @@
-from pkg.modules import *
+# 골 디택션 모듈
+from __future__ import annotations
+from typing import List, Tuple
+from supervision import VideoSink
+import torch
+from supervision import VideoInfo
+from supervision import get_video_frames_generator
+from shapely.geometry import Point, Polygon
+
+from ultralytics import YOLO # 객체 탐지 모듈
+import supervision as sv # 객체 탐지 라벨링 모듈
+import cv2 # 컴퓨터 비전 관련 모듈
+from flask import Flask, render_template, request, redirect, jsonify # 웹 프레임워크 관련 모듈
+from werkzeug.utils import secure_filename # 링크 보안 관련 모듈
+import boto3 # 서버 관련 모듈
+import zipfile # 압축 관련 모듈
+import os # 경로 관련 모듈
+import shutil # 디렉토리의 내용 삭제 관련 모듈
+import logging # 서버 로그 모듈
+from botocore.exceptions import NoCredentialsError, ClientError # 서버 에러 핸들링 관련 모듈
+import pandas as pd # 데이터 분석 모듈
+import mplsoccer # 축구 데이터 분석용 모듈
+import warnings # pandas warning 무시용
+from tqdm import tqdm
+from markupsafe import Markup
 
 os.chdir('../')
 s3 = boto3.client('s3')
@@ -9,6 +33,8 @@ warnings.filterwarnings(action='ignore')
 
 ball_pt_path ='SpoitWeb/static/models/best.pt'
 detection_model = YOLO(ball_pt_path)
+position_pt_path ='SpoitWeb/static/models/best_position.pt'
+position_model = YOLO(position_pt_path)
 
 def upload_to_s3(s3, file, bucket):
     try:
@@ -123,7 +149,6 @@ def long_running_task_detection(files):
     # 객체 탐지
     detected_dir_path = 'SpoitWeb/static/detected'
 
-
     img_file_paths = get_images(img_dir_path)
     for img_file_path in tqdm(img_file_paths):
         detected_image_generator(img_file_path, detected_dir_path)
@@ -144,8 +169,8 @@ class Plot():
     return self.pitch, self.fig, self.ax
   def set_title(self, title):
     self.ax.set_title(title)
-  def save_image(self):
-    self.fig.savefig(f'SpoitWeb/static/images/heatmap.png')
+  def save_image(self, path):
+    self.fig.savefig(path)
 
 def heatmap(pass_df, plot):
   pitch, fig, ax = plot.call_plot()
@@ -154,40 +179,50 @@ def heatmap(pass_df, plot):
       fill = True, thresh = 0.05, alpha = .5, levels = 50, cmap = 'viridis'
   )
 
-def alternative_position(conc):
-    if conc in ['Center Forward', 'Left Center Forward', 'Right Center Forward', 'Left Wing', 'Right Wing']:
-        return 'Forward'
-    elif conc in ['Left Attacking Midfield', 'Right Attacking Midfield', 'Center Attacking Midfield', 'Secondary Striker', 'Right Midfield', 'Left Midfield', 'Left Center Midfield', 'Right Center Midfield']:
-        return 'Midfield'
-    elif conc in ['Left Wing Back', 'Left Back', 'Right Wing Back', 'Right Back']:
-        return 'Side Back'
-    elif conc in ['Left Center Back', 'Right Center Back', 'Center Back']:
-        return 'Center Back'
-    elif conc in ['Goalkeeper']:
-        return 'Goalkeeper'
-    return 'not known'
+def sided(position):
+    position = position.replace('Right', 'Side')
+    position = position.replace('Left', 'Side')
+    return position
 
-def position_prediction_euclidean(predicted_pos, data):
-    player_x = data['x'].mean()
-    player_y = data['y'].mean()
+def limitations(probs):
+    '''
+    {0: 'Center Attacking Midfield', 1: 'Center Defensive Midfield', 2: 'Goalkeeper', 3: 'Left Back', 4: 'Left Center Back', 5: 'Left Center Midfield', 6: 'Left Defensive Midfield', 7: 'Left Wing', 8: 'Right Back', 9: 'Right Center Back', 10: 'Right Center Midfield', 11: 'Right Defensive Midfield', 12: 'Right Wing'}
+    '''
+    probs[0] *= 3
+    probs[1] *= 2.5
+    probs[7] *= 5
+    probs[12] *= 5
+    make100 = sum(probs)
+    for i in range(len(probs)):
+        probs[i] = probs[i] / make100
+    return probs
 
-    min_dist = float('inf')
-    conc = ''
+def make_percentage(probs):
+    for i in range(len(probs)):
+        probs[i] *= 100
+        probs[i] = f'{probs[i]:.0f}%'
 
-    for i in range(len(predicted_pos)):
-        position_name, x, y = predicted_pos.iloc[i][0], predicted_pos.iloc[i][1], predicted_pos.iloc[i][2]
-        dist = ((x-player_x)**2 + (y-player_y)**2)**0.5
-        if min_dist > dist:
-            min_dist = dist
-            conc = position_name
-    return alternative_position(conc)
-
-def get_position_explanation(pos):
-    with open(f'SpoitWeb/static/coachDB/feature/{pos}.txt', 'r') as file:
-        data = file.read().replace('\n', '<br />')
-    return data
+def position_prediction_YOLO(given_pos, heatmap_path):
+    results = position_model.predict(heatmap_path, svae=False)
+    for result in results:
+        probs = result.probs.data.tolist()
+        probs = limitations(probs)
+    ranks = sorted(probs, reverse = True)
+    first =  position_model.names[probs.index(ranks[0])]
+    second = position_model.names[probs.index(ranks[1])]
+    third = position_model.names[probs.index(ranks[2])]
+    make_percentage(probs)
+    position = sided(position); first = sided(first); second = sided(second); third = sided(third)
+    if first == 'Goalkeeper':
+        return first
+    if given_pos == first:
+        return second
+    if given_pos != first:
+        return first
 
 def get_coach_recommendation(pos):
+    if pos == 'Center Attacking Midfield' or 'Side Wing':
+        pos = 'Forward'
     with open(f'SpoitWeb/static/coachDB/coach/{pos}.txt', 'r') as file:
         data = file.read().replace('\n', '<br />')
     return data
@@ -227,21 +262,21 @@ def long_running_task_coach(files):
     s3.upload_file(save_path, BUCKET_NAME, DIRECTORY_NAME + f"{secure_filename_str}")
     url1 = urlGenerate(s3, BUCKET_NAME, DIRECTORY_NAME + f"{secure_filename_str}")
 
-    # 포지션별 평균 위치 데이터 불러오기 및 euclidean distance 계산해서 최고의 포지션 예측하기
-    position_path = 'SpoitWeb/static/coachDB/position_xy.csv'
-    predicted_pos = pd.read_csv(position_path)
+    # 데이터를 임포트하고, 포지션 이름을 파일 이름으로부터 추출하기
     data = pd.read_csv(save_path)
-    predicted_pos_ret = position_prediction_euclidean(predicted_pos, data)
-    position_explanation = get_position_explanation(predicted_pos_ret)
-    coach_recommendation = get_coach_recommendation(predicted_pos_ret)
-
+    position = save_path.split('_')[-1].strip('.csv')
+    
     # 히트맵 만들기
     map = Plot()
     map.set_title("Player Passmap (=>)")
     heatmap(data, map)
-    map.save_image()
+    heatmap_path = 'SpoitWeb/static/images/heatmap.png'
+    map.save_image(heatmap_path)
 
-    return [url1, predicted_pos_ret, position_explanation, coach_recommendation]
+    recommended_position = position_prediction_YOLO(position, heatmap_path)
+    position_explanation = f"<p>선택된 포지션: {position}, 추천 드리는 포지션: {recommended_position}</p>"
+    coach_recommendation = get_coach_recommendation(recommended_position)
+    return [url1, recommended_position, position_explanation, coach_recommendation]
 
 @app.route('/')
 def index():
@@ -274,4 +309,4 @@ def upload_coach():
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port = 8080)
 
-# http://127.0.0.1:5000
+# http://127.0.0.1:8080
