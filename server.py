@@ -1,11 +1,11 @@
-# 골 디택션 모듈
-from __future__ import annotations
-from typing import List, Tuple
-from supervision import VideoSink
-import torch
-from supervision import VideoInfo
-from supervision import get_video_frames_generator
-from shapely.geometry import Point, Polygon
+# 골 디택션 모듈 => KTCC에서는 사용 X
+# from __future__ import annotations
+# from typing import List, Tuple
+# from supervision import VideoSink
+# import torch
+# from supervision import VideoInfo
+# from supervision import get_video_frames_generator
+# from shapely.geometry import Point, Polygon
 
 from ultralytics import YOLO # 객체 탐지 모듈
 import supervision as sv # 객체 탐지 라벨링 모듈
@@ -21,8 +21,8 @@ from botocore.exceptions import NoCredentialsError, ClientError # 서버 에러 
 import pandas as pd # 데이터 분석 모듈
 import mplsoccer # 축구 데이터 분석용 모듈
 import warnings # pandas warning 무시용
-from tqdm import tqdm
-from markupsafe import Markup
+from tqdm import tqdm # 로딩창 시각화
+from markupsafe import Markup # FLASK => HTML
 
 os.chdir('../')
 s3 = boto3.client('s3')
