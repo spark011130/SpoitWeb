@@ -41,11 +41,11 @@
 									<a href="{{URL_original}}" download = "player_data.csv" class="button icon solid fa-download">Player data</a>
 									<p>위 버튼은 업로드된 선수의 경기 기록를 다시 다운 받는데 사용됩니다.</p>
 								</header>
-								<p>이 페이지에서는 선수의 경기 기록을 토대로 적합한 포지션과 코치를 추천합니다.<br />
+								<p>이 페이지에서는 선수의 경기 기록을 토대로 기존 포지션과 적합한 포지션과 코치를 추천합니다.<br />
 									평가자님께서는 추천된 코치와 해당 선수가 지향하는 코치를 비교하여 정확도를 확인하실 수 있습니다.
 								</p>
 								<span class="image fit"><img src="{{ url_for('static', filename='images/heatmap.png') }}" alt="heatmap" /></span>
-								<h2>선수에게 적합한 포지션은 {{position_name}}입니다.</h2>
+								<h2>선수에게 추천드리는 포지션은 {{position_name}}입니다.</h2>
 								{{feature_explanation}}
 								{{coach_explanation}}
 							</section>

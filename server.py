@@ -73,6 +73,7 @@ def zip_images(folder_path, zip_filename):
                 zipf.write(file_path, os.path.basename(file_path))
 
 def detected_image_generator(image_path, save_path):
+    print(image_path, os.path.basename(image_path), save_path)
     image = cv2.imread(image_path)
 
     result = detection_model(image)[0]
@@ -130,7 +131,7 @@ def long_running_task_detection(files):
             return redirect(request.url)
 
         secure_filename_str = secure_filename(file.filename)
-
+        print(secure_filename_str)
         save_path = f'SpoitWeb/static/temp/{secure_filename_str}'
         file.save(save_path)
 
@@ -203,7 +204,7 @@ def make_percentage(probs):
         probs[i] = f'{probs[i]:.0f}%'
 
 def position_prediction_YOLO(given_pos, heatmap_path):
-    results = position_model.predict(heatmap_path, svae=False)
+    results = position_model.predict(heatmap_path, save=False)
     for result in results:
         probs = result.probs.data.tolist()
         probs = limitations(probs)
@@ -212,12 +213,12 @@ def position_prediction_YOLO(given_pos, heatmap_path):
     second = position_model.names[probs.index(ranks[1])]
     third = position_model.names[probs.index(ranks[2])]
     make_percentage(probs)
-    position = sided(position); first = sided(first); second = sided(second); third = sided(third)
+    position = sided(given_pos); first = sided(first); second = sided(second); third = sided(third)
     if first == 'Goalkeeper':
         return first
-    if given_pos == first:
+    if position  == first:
         return second
-    if given_pos != first:
+    if position != first:
         return first
 
 def get_coach_recommendation(pos):
@@ -268,13 +269,13 @@ def long_running_task_coach(files):
     
     # 히트맵 만들기
     map = Plot()
-    map.set_title("Player Passmap (=>)")
+    map.set_title("Player Passmap")
     heatmap(data, map)
     heatmap_path = 'SpoitWeb/static/images/heatmap.png'
     map.save_image(heatmap_path)
 
     recommended_position = position_prediction_YOLO(position, heatmap_path)
-    position_explanation = f"<p>선택된 포지션: {position}, 추천 드리는 포지션: {recommended_position}</p>"
+    position_explanation = f"<p>기존 포지션: {position}, 추천 드리는 포지션: {recommended_position}</p>"
     coach_recommendation = get_coach_recommendation(recommended_position)
     return [url1, recommended_position, position_explanation, coach_recommendation]
 
