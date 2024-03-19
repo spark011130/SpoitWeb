@@ -6,7 +6,9 @@
 # from supervision import VideoInfo
 # from supervision import get_video_frames_generator
 # from shapely.geometry import Point, Polygon
-
+from shapely.geometry import box
+import pickle
+import numpy as np
 from ultralytics import YOLO # 객체 탐지 모듈
 import supervision as sv # 객체 탐지 라벨링 모듈
 import cv2 # 컴퓨터 비전 관련 모듈
@@ -33,7 +35,7 @@ warnings.filterwarnings(action='ignore')
 
 ball_pt_path ='SpoitWeb/static/models/best.pt'
 detection_model = YOLO(ball_pt_path)
-position_pt_path ='SpoitWeb/static/models/best_position.pt'
+position_pt_path ='SpoitWeb/static/models/best_position_v2.pt'
 position_model = YOLO(position_pt_path)
 
 def upload_to_s3(s3, file, bucket):
@@ -68,12 +70,11 @@ def zip_images(folder_path, zip_filename):
     with zipfile.ZipFile(zip_filename, 'w') as zipf:
         for file in file_list:
             # 이미지 파일인 경우에만 압축합니다. 여기서는 확장자가 .jpg, .png, .gif .jpeg로 가정합니다.
-            if file.lower().endswith(('.jpg', '.png', '.gif', 'jpeg')):
+            if file.lower().endswith(('.jpg', '.png', '.gif', 'jpeg', '.pickle')):
                 file_path = os.path.join(folder_path, file)
                 zipf.write(file_path, os.path.basename(file_path))
 
 def detected_image_generator(image_path, save_path):
-    print(image_path, os.path.basename(image_path), save_path)
     image = cv2.imread(image_path)
 
     result = detection_model(image)[0]
@@ -94,7 +95,11 @@ def detected_image_generator(image_path, save_path):
             result.names[class_id] for class_id in detections.class_id
         ]
     )
-
+    ids = np.array(result.boxes.cls.cpu())
+    boxes = np.array(result.boxes.xyxy.cpu())
+    boxesByClass = [[] for _ in range(4)]
+    for box, id in zip(boxes, ids): boxesByClass[int(id)].append(list(box))
+    with open(save_path + '/' + os.path.basename(image_path).strip('.jpg') + '.pickle', 'wb') as f: pickle.dump(boxesByClass, f)
     cv2.imwrite(save_path + '/' + os.path.basename(image_path), annotated_frame_label)
 
 def get_images(folder_path):
@@ -190,7 +195,7 @@ def limitations(probs):
     {0: 'Center Attacking Midfield', 1: 'Center Defensive Midfield', 2: 'Goalkeeper', 3: 'Left Back', 4: 'Left Center Back', 5: 'Left Center Midfield', 6: 'Left Defensive Midfield', 7: 'Left Wing', 8: 'Right Back', 9: 'Right Center Back', 10: 'Right Center Midfield', 11: 'Right Defensive Midfield', 12: 'Right Wing'}
     '''
     probs[0] *= 3
-    probs[1] *= 2.5
+    probs[1] *= 2.5 
     probs[7] *= 5
     probs[12] *= 5
     make100 = sum(probs)
@@ -213,14 +218,14 @@ def position_prediction_YOLO(given_pos, heatmap_path):
     second = position_model.names[probs.index(ranks[1])]
     third = position_model.names[probs.index(ranks[2])]
     make_percentage(probs)
+    print(probs, flush = True)
+    print(position_model.names, flush = True)
+    print(first, second, third, flush = True)
     position = sided(given_pos); first = sided(first); second = sided(second); third = sided(third)
-    if first == 'Goalkeeper':
-        return first
-    if position  == first:
-        return second
-    if position != first:
-        return first
-
+    if first == 'Goalkeeper': return 'Goalkeeper'
+    if first == second:
+        return third
+    return second
 def get_coach_recommendation(pos):
     if pos == 'Center Attacking Midfield' or 'Side Wing':
         pos = 'Forward'
