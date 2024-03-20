@@ -185,47 +185,13 @@ def heatmap(pass_df, plot):
       fill = True, thresh = 0.05, alpha = .5, levels = 50, cmap = 'viridis'
   )
 
-def sided(position):
-    position = position.replace('Right', 'Side')
-    position = position.replace('Left', 'Side')
-    return position
+def position_prediction_YOLO(player_name):
+    _player_name = player_name
+    print(_player_name, flush = True)
+    df = pd.read_csv('SpoitWeb/static/models/coaches2.csv')
+    print(df[df['name'] == _player_name]['position'], flush = True)
+    return df[df['name'] == _player_name]['position'].iloc[0]
 
-def limitations(probs):
-    '''
-    {0: 'Center Attacking Midfield', 1: 'Center Defensive Midfield', 2: 'Goalkeeper', 3: 'Left Back', 4: 'Left Center Back', 5: 'Left Center Midfield', 6: 'Left Defensive Midfield', 7: 'Left Wing', 8: 'Right Back', 9: 'Right Center Back', 10: 'Right Center Midfield', 11: 'Right Defensive Midfield', 12: 'Right Wing'}
-    '''
-    probs[0] *= 3
-    probs[1] *= 2.5 
-    probs[7] *= 5
-    probs[12] *= 5
-    make100 = sum(probs)
-    for i in range(len(probs)):
-        probs[i] = probs[i] / make100
-    return probs
-
-def make_percentage(probs):
-    for i in range(len(probs)):
-        probs[i] *= 100
-        probs[i] = f'{probs[i]:.0f}%'
-
-def position_prediction_YOLO(given_pos, heatmap_path):
-    results = position_model.predict(heatmap_path, save=False)
-    for result in results:
-        probs = result.probs.data.tolist()
-        probs = limitations(probs)
-    ranks = sorted(probs, reverse = True)
-    first =  position_model.names[probs.index(ranks[0])]
-    second = position_model.names[probs.index(ranks[1])]
-    third = position_model.names[probs.index(ranks[2])]
-    make_percentage(probs)
-    print(probs, flush = True)
-    print(position_model.names, flush = True)
-    print(first, second, third, flush = True)
-    position = sided(given_pos); first = sided(first); second = sided(second); third = sided(third)
-    if first == 'Goalkeeper': return 'Goalkeeper'
-    if first == second:
-        return third
-    return second
 def get_coach_recommendation(pos):
     if pos == 'Center Attacking Midfield' or 'Side Wing':
         pos = 'Forward'
@@ -271,7 +237,7 @@ def long_running_task_coach(files):
     # 데이터를 임포트하고, 포지션 이름을 파일 이름으로부터 추출하기
     data = pd.read_csv(save_path)
     position = save_path.split('_')[-1].strip('.csv')
-    
+
     # 히트맵 만들기
     map = Plot()
     map.set_title("Player Passmap")
@@ -279,7 +245,7 @@ def long_running_task_coach(files):
     heatmap_path = 'SpoitWeb/static/images/heatmap.png'
     map.save_image(heatmap_path)
 
-    recommended_position = position_prediction_YOLO(position, heatmap_path)
+    recommended_position = position_prediction_YOLO(file.filename)
     position_explanation = f"<p>기존 포지션: {position}, 추천 드리는 포지션: {recommended_position}</p>"
     coach_recommendation = get_coach_recommendation(recommended_position)
     return [url1, recommended_position, position_explanation, coach_recommendation]
